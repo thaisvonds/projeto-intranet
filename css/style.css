@@ -156,6 +156,12 @@ a {
   padding: 20px 16px 8px;
 }
 
+.sidebar-section-divider {
+  margin-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.18);
+  padding-top: 14px;
+}
+
 .sidebar-section-title {
   font-size: 11px;
   text-transform: uppercase;
@@ -294,8 +300,8 @@ a {
 /* ========== CARD GRID ========== */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
 }
 
 /* ========== ESCALAS DE PLANTÕES ========== */
@@ -404,7 +410,7 @@ a {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 18px 12px;
+  padding: 10px 8px;
   text-align: center;
   cursor: pointer;
   border: 1px solid var(--gray-200);
@@ -418,14 +424,14 @@ a {
 }
 
 .card-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 14px;
+  width: 66px;
+  height: 66px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  margin-bottom: 8px;
+  font-size: 24px;
+  margin-bottom: 6px;
   overflow: hidden;
 }
 
@@ -446,19 +452,18 @@ a {
 .card-icon.indigo { }
 
 .card-title {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--gray-800);
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 /* ========== RIGHT PANEL ========== */
 .right-panel {
   width: var(--right-panel-width);
   flex-shrink: 0;
-  position: sticky;
-  top: calc(var(--header-height) + 24px);
-  max-height: calc(100vh - var(--header-height) - 48px);
+  position: static;
+  max-height: none;
   display: flex;
   flex-direction: column;
 }
@@ -605,7 +610,7 @@ a {
     margin-left: 0;
   }
   .cards-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(114px, 1fr));
   }
   .mobile-menu-btn {
     display: flex;
