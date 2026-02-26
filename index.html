@@ -191,25 +191,25 @@
         </div>
 
         <div class="plantao-tabs" role="tablist" aria-label="Escalas de Plantões">
-          <button class="plantao-tab is-active" type="button" role="tab" aria-selected="true" data-pdf="pdfs/plantao/plantao-diurno.pdf">
+          <button class="plantao-tab is-active" type="button" role="tab" aria-selected="true" data-img="pdfs/plantao/plantao-diurno.png">
             Diurno
           </button>
-          <button class="plantao-tab" type="button" role="tab" aria-selected="false" data-pdf="pdfs/plantao/plantao-noturno.pdf">
+          <button class="plantao-tab" type="button" role="tab" aria-selected="false" data-img="pdfs/plantao/plantao-noturno.png">
             Noturno
           </button>
-          <button class="plantao-tab" type="button" role="tab" aria-selected="false" data-pdf="pdfs/plantao/plantao-ti.pdf">
+          <button class="plantao-tab" type="button" role="tab" aria-selected="false" data-img="pdfs/plantao/plantao-ti.png">
             TI
           </button>
         </div>
 
         <div class="plantao-viewer-wrapper">
-          <iframe
-            id="plantaoPdfViewer"
+          <img
+            id="plantaoImageViewer"
             class="plantao-viewer"
-            src="pdfs/plantao/plantao-diurno.pdf"
-            title="Escala de Plantão"
+            src="pdfs/plantao/plantao-diurno.png"
+            alt="Escala de Plantão"
             loading="lazy"
-          ></iframe>
+          />
         </div>
       </section>
 
@@ -271,6 +271,14 @@
       © <span id="footerYear"></span>
     </div>
   </footer>
+
+  <div class="image-zoom-modal" id="imageZoomModal" aria-hidden="true">
+    <div class="image-zoom-backdrop" id="imageZoomBackdrop"></div>
+    <div class="image-zoom-content" role="dialog" aria-modal="true" aria-label="Visualização ampliada da imagem">
+      <button type="button" class="image-zoom-close" id="imageZoomClose" aria-label="Fechar visualização ampliada">×</button>
+      <img id="imageZoomModalImg" class="image-zoom-modal-img" src="" alt="" />
+    </div>
+  </div>
 
   <script src="js/main.js"></script>
   <script>
