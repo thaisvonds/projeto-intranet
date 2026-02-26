@@ -85,6 +85,12 @@ document.addEventListener('DOMContentLoaded', function () {
     plantaoImageViewer.addEventListener('click', openImageZoom);
     imageZoomClose.addEventListener('click', closeImageZoom);
     imageZoomBackdrop.addEventListener('click', closeImageZoom);
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && imageZoomModal.classList.contains('is-open')) {
+        closeImageZoom();
+      }
+    });
   }
 
 });
