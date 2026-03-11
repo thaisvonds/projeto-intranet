@@ -1,19 +1,5 @@
-// ============================
-// Portal Institucional IGEN
-// main.js
-// ============================
 
 document.addEventListener('DOMContentLoaded', function () {
-
-  // Mobile menu toggle
-  var menuBtn = document.getElementById('mobileMenuBtn');
-  var sidebar = document.getElementById('sidebarLeft');
-
-  if (menuBtn && sidebar) {
-    menuBtn.addEventListener('click', function () {
-      sidebar.classList.toggle('open');
-    });
-  }
 
   // Right panel search filter
   var searchInput = document.getElementById('ramalSearch');
@@ -25,17 +11,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var text = row.textContent.toLowerCase();
         row.style.display = text.indexOf(filter) > -1 ? '' : 'none';
       });
-    });
-  }
-
-  // Header search (placeholder behavior)
-  var headerSearch = document.getElementById('headerSearch');
-  if (headerSearch) {
-    headerSearch.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        alert('Busca: ' + this.value);
-      }
     });
   }
 
