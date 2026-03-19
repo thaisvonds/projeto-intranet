@@ -1,7 +1,6 @@
-
 document.addEventListener('DOMContentLoaded', function () {
 
-  // Right panel search filter
+  // 1. FILTRO DE BUSCA (RAMAIS)
   var searchInput = document.getElementById('ramalSearch');
   if (searchInput) {
     searchInput.addEventListener('input', function () {
@@ -14,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Escalas de Plantões tabs + imagem PNG
+  // 2. ESCALAS DE PLANTÕES (TABS)
   var plantaoTabs = document.querySelectorAll('.plantao-tab');
   var plantaoImageViewer = document.getElementById('plantaoImageViewer');
 
@@ -22,9 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     plantaoTabs.forEach(function (tab) {
       tab.addEventListener('click', function () {
         var imagePath = this.getAttribute('data-img');
-        if (!imagePath) {
-          return;
-        }
+        if (!imagePath) return;
 
         plantaoTabs.forEach(function (item) {
           item.classList.remove('is-active');
@@ -38,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Zoom da imagem de plantão
+  // 3. ZOOM DA IMAGEM DE PLANTÃO
   var imageZoomModal = document.getElementById('imageZoomModal');
   var imageZoomModalImg = document.getElementById('imageZoomModalImg');
   var imageZoomClose = document.getElementById('imageZoomClose');
@@ -67,5 +64,86 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+
+  // 4. CARROSSEL DE NOTÍCIAS (JSON)
+  async function initCarousel() {
+    const track = document.getElementById('newsTrack');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if (!track || !prevBtn || !nextBtn) return;
+
+    try {
+      // Busca os dados do JSON
+      const response = await fetch('js/noticias.json');
+      if (!response.ok) throw new Error('Erro ao carregar o arquivo JSON');
+      
+      const noticias = await response.json();
+      
+      if (noticias.length === 0) {
+        track.innerHTML = '<div class="loading-msg">Nenhuma notícia disponível.</div>';
+        return;
+      }
+
+      // Limpa e monta os slides
+      track.innerHTML = '';
+      noticias.forEach(noticia => {
+        const slide = document.createElement('div');
+        slide.className = 'carousel-slide';
+        slide.innerHTML = `
+          <a href="${noticia.link}" target="_blank">
+            <img src="${noticia.imagem}" alt="${noticia.titulo}">
+          </a>
+        `;
+        track.appendChild(slide);
+      });
+
+      // Lógica de movimento
+      let index = 0;
+      const total = noticias.length;
+
+      function updateSlide() {
+        track.style.transform = `translateX(-${index * 100}%)`;
+      }
+
+      function nextSlide() {
+        index = (index + 1) % total;
+        updateSlide();
+      }
+
+      function prevSlide() {
+        index = (index - 1 + total) % total;
+        updateSlide();
+      }
+
+      // Timer Automático (3 segundos)
+      let timer = setInterval(nextSlide, 3000);
+
+      // Eventos dos botões
+      nextBtn.addEventListener('click', () => {
+        nextSlide();
+        clearInterval(timer);
+        timer = setInterval(nextSlide, 3000);
+      });
+
+      prevBtn.addEventListener('click', () => {
+        prevSlide();
+        clearInterval(timer);
+        timer = setInterval(nextSlide, 3000);
+      });
+
+      // Recarrega ícones do Lucide para os botões do carrossel
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+    } catch (error) {
+      console.error('Erro no carrossel:', error);
+      track.innerHTML = '<div class="loading-msg">Erro ao carregar notícias. Verifique o console.</div>';
+    }
+  }
+
+  // Inicializa o carrossel
+  initCarousel();
 
 });

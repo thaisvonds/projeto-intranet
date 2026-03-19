@@ -1,0 +1,12 @@
+[
+  {
+    "imagem": "images/noticias/slide1.png",
+    "link": "https://link-da-noticia-1.com",
+    "titulo": "Notícia 01"
+  },
+  {
+    "imagem": "images/noticias/slide2.png",
+    "link": "https://link-da-noticia-2.com",
+    "titulo": "Notícia 02"
+  }
+]
