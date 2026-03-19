@@ -7,6 +7,7 @@
   <title>Portal Institucional IGEN</title>
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 </head>
 
@@ -252,6 +253,16 @@
         <div class="plantao-viewer-wrapper">
           <img id="plantaoImageViewer" class="plantao-viewer" src="pdfs/plantao/plantao-diurno.png"
             alt="Escala de Plantão" loading="lazy" />
+        </div>
+      </section>
+
+      <section class="status-desempenho-section news-section" aria-labelledby="status-desempenho-title">
+        <div class="right-panel-header">
+          <h3 id="status-desempenho-title">Acompanhamento do desempenho</h3>
+        </div>
+        <div class="status-desempenho-chart-wrapper">
+          <div id="chart_div" aria-live="polite"></div>
+          <p class="status-desempenho-label" id="statusDesempenhoLabel">Carregando status...</p>
         </div>
       </section>
 

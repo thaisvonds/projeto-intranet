@@ -70,16 +70,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const track = document.getElementById('newsTrack');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
-    
+
     if (!track || !prevBtn || !nextBtn) return;
 
     try {
       // Busca os dados do JSON
       const response = await fetch('js/noticias.json');
       if (!response.ok) throw new Error('Erro ao carregar o arquivo JSON');
-      
+
       const noticias = await response.json();
-      
+
       if (noticias.length === 0) {
         track.innerHTML = '<div class="loading-msg">Nenhuma notícia disponível.</div>';
         return;
@@ -145,5 +145,68 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Inicializa o carrossel
   initCarousel();
+
+  // 5. STATUS PROCESSAMENTO DESEMPENHO (GOOGLE CHARTS)
+  async function initStatusProcessamentoDesempenho() {
+    var chartElement = document.getElementById('chart_div');
+    var statusLabel = document.getElementById('statusDesempenhoLabel');
+
+    if (!chartElement || !statusLabel) return;
+
+    var applyFallback = function (message) {
+      chartElement.innerHTML = '';
+      statusLabel.textContent = message;
+    };
+
+    try {
+      var response = await fetch('js/status-processamento-desempenho.json');
+      if (!response.ok) throw new Error('Erro ao carregar JSON de status');
+
+      var statusData = await response.json();
+      var valorAtual = Number(statusData.valorAtual);
+      if (Number.isNaN(valorAtual)) valorAtual = 0;
+
+      var label = statusData.label || 'Eficiência';
+      if (typeof google !== 'undefined') {
+        google.charts.load('current', { packages: ['gauge'] });
+      }
+
+      async function initStatusProcessamentoDesempenho() {
+      }
+
+      google.charts.load('current', { packages: ['gauge'] });
+      google.charts.setOnLoadCallback(function () {
+        var data = google.visualization.arrayToDataTable([
+          ['Label', 'Value'],
+          ['Desempenho', valorAtual]
+        ]);
+        var options = {
+          height: 190,
+          min: 0,
+          max: 100,
+          redFrom: 0,
+          redTo: 50,
+          yellowFrom: 50,
+          yellowTo: 75,
+          greenFrom: 75,
+          greenTo: 100,
+          minorTicks: 5
+        };
+
+        var chart = new google.visualization.Gauge(chartElement);
+        chart.draw(data, options);
+        statusLabel.textContent = label + ': ' + valorAtual + '%';
+
+        window.addEventListener('resize', function () {
+          chart.draw(data, options);
+        });
+      });
+    } catch (error) {
+      console.error('Erro ao carregar status de desempenho:', error);
+      applyFallback('Não foi possível carregar o status de desempenho.');
+    }
+  }
+
+  initStatusProcessamentoDesempenho();
 
 });

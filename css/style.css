@@ -374,6 +374,31 @@ a {
   cursor: zoom-in;
 }
 
+.status-desempenho-section {
+  margin-top: 24px;
+}
+
+.status-desempenho-chart-wrapper {
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 18px;
+}
+
+#chart_div {
+  width: 100%;
+  min-height: 190px;
+}
+
+.status-desempenho-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
 .image-zoom-modal {
   position: fixed;
   inset: 0;
