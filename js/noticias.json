@@ -6,7 +6,12 @@
   },
   {
     "imagem": "images/noticias/slide2.png",
-    "link": "https://link-da-noticia-2.com",
+    "link": "https://ihiw19.org/",
     "titulo": "Notícia 02"
+  },
+  {
+    "imagem": "images/noticias/slide3.png",
+    "link": "https://link-da-noticia-3.com",
+    "titulo": "Notícia 03"
   }
 ]

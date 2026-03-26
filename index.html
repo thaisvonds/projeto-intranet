@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Portal Institucional IGEN</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -105,7 +107,7 @@
         </video>
       </div>
 
-      <!-- ========== NEWS SECTION ========== -->
+      <!-- ========== NEWS SECTION (JSON/CARROSSEL) ========== -->
       <section class="news-section">
         <div class="right-panel-header">
           <h3>Notícias do IGEN</h3>
@@ -124,6 +126,31 @@
           </div>
         </div>
       </section>
+
+      <!--
+      ========== NEWS SECTION (GOOGLE SLIDES) - DESATIVADA ==========
+      <section class="news-section">
+        <div class="right-panel-header">
+          <h3>Notícias do IGEN</h3>
+        </div>
+
+        <div class="news-container">
+          <div class="carousel-wrapper">
+            <div class="news-slides-cover" data-base-width="1000" data-base-height="300">
+              <iframe class="news-slides-embed" data-base-width="1000" data-base-height="300"
+                src="https://docs.google.com/presentation/d/e/2PACX-1vTY8nQ7niNoRZ2_eya3P_5cVwz8BKPe3I2TivvVT0y3TDo9jdAIXtVbxU36NGQBG7R1epLuiJRYr1UZ/embed?start=true&loop=true&delayms=5000"
+                title="Notícias do IGEN - Google Slides" loading="lazy" allowfullscreen="true" mozallowfullscreen="true"
+                webkitallowfullscreen="true">
+              </iframe>
+            </div>
+          </div>
+          <div class="news-slides-link-wrap">
+            <a href="https://docs.google.com/presentation/d/e/2PACX-1vTY8nQ7niNoRZ2_eya3P_5cVwz8BKPe3I2TivvVT0y3TDo9jdAIXtVbxU36NGQBG7R1epLuiJRYr1UZ/pub?start=true&loop=true&delayms=5000"
+              target="_blank" rel="noopener noreferrer" class="news-slides-link">Abrir apresentação no Google Slides</a>
+          </div>
+        </div>
+      </section>
+      -->
 
       <div class="cards-grid">
 
@@ -228,31 +255,41 @@
           <div class="card-title">Relatórios SRI</div>
         </a>
 
-      </div>
+        <!-- ========== ESCALA PLANTAO ========== -->
 
-      <section class="plantao-section" aria-labelledby="plantao-title">
+      </div>
+      <section class="plantao-section">
         <div class="plantao-header">
           <h2 id="plantao-title">Escalas de Plantões</h2>
         </div>
 
-        <div class="plantao-tabs" role="tablist" aria-label="Escalas de Plantões">
-          <button class="plantao-tab is-active" type="button" role="tab" aria-selected="true"
-            data-img="pdfs/plantao/plantao-diurno.png">
-            Diurno
-          </button>
-          <button class="plantao-tab" type="button" role="tab" aria-selected="false"
-            data-img="pdfs/plantao/plantao-noturno.png">
-            Noturno
-          </button>
-          <button class="plantao-tab" type="button" role="tab" aria-selected="false"
-            data-img="pdfs/plantao/plantao-ti.png">
-            TI
-          </button>
+        <div class="plantao-search-area" aria-label="Busca na escala de plantão">
+          <label for="calendarSearch" class="plantao-search-label">Busca na escala</label>
+          <input type="text" id="calendarSearch" placeholder="Digite o nome do colaborador"
+            class="plantao-search-input">
         </div>
 
-        <div class="plantao-viewer-wrapper">
-          <img id="plantaoImageViewer" class="plantao-viewer" src="pdfs/plantao/plantao-diurno.png"
-            alt="Escala de Plantão" loading="lazy" />
+        <div class="plantao-tabs" role="tablist">
+          <button class="plantao-tab is-active" data-type="todos">Todos</button>
+          <button class="plantao-tab" data-type="hoje">Hoje</button> <button class="plantao-tab"
+            data-type="Diurno">Diurno</button>
+          <button class="plantao-tab" data-type="Noturno">Noturno</button>
+          <button class="plantao-tab" data-type="TI">TI</button>
+        </div>
+
+        <div class="plantao-viewer-wrapper" style="padding: 20px; background: white;">
+          <div id="calendar"></div>
+        </div>
+        <!--FERIAS/FOLGAS-->
+        <div class="calendario-info-extra">
+          <div class="info-card">
+            <h3><i class="fas fa-umbrella-beach"></i> Férias</h3>
+            <ul id="lista-ferias"></ul>
+          </div>
+          <div class="info-card">
+            <h3><i class="fas fa-calendar-check"></i> Folga Mensal</h3>
+            <ul id="lista-folgas"></ul>
+          </div>
         </div>
       </section>
 
@@ -264,6 +301,7 @@
           <div id="chart_div" aria-live="polite"></div>
           <p class="status-desempenho-label" id="statusDesempenhoLabel">Carregando status...</p>
         </div>
+
       </section>
 
     </main>
