@@ -9,14 +9,13 @@
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 </head>
 
 <body>
 
-  <!-- ========== SIDEBAR LEFT ========== -->
-  <nav class="sidebar-left" id="sidebarLeft">
+  <!-- ========== LOGO NO TOPO ========== -->
+  <nav class="sidebar-left" id="sidebarLeft" aria-label="Navegação lateral principal">
     <div class="sidebar-logo">
       <a href="https://www.igen.org.br/" class="sidebar-logo-placeholder">
         <img src="images/logo.png" alt="IGEN">
@@ -60,7 +59,7 @@
       </table>
     </div>
 
-    <!-- Calendários -->
+    <!-- Calendários - LATERAL -->
     <div class="sidebar-section">
       <div class="sidebar-section-title">Calendários</div>
       <a href="images/calendario.png" class="sidebar-link" target="_blank" rel="noopener noreferrer"><i
@@ -71,7 +70,7 @@
         rel="noopener noreferrer"><i data-lucide="calendar-check"></i> Escala Final de Ano</a>
     </div>
 
-    <!-- Agenda -->
+    <!-- Agenda - LATERAL -->
     <div class="sidebar-section">
       <div class="sidebar-section-title">Agenda</div>
       <a href="http://fs2/Plantoes/Visitas.pdf" class="sidebar-link" target="_blank" rel="noopener noreferrer"><i
@@ -80,7 +79,7 @@
         rel="noopener noreferrer"><i data-lucide="clipboard"></i> Cronograma de Treinamentos</a>
     </div>
 
-    <!-- Links avulsos -->
+    <!-- Links avulsos - LATERAL -->
 
     <div class="sidebar-section sidebar-section-divider">
       <a href="pdfs/plano-contingencia.pdf" class="sidebar-link" target="_blank" rel="noopener noreferrer"><i
@@ -99,15 +98,15 @@
     <main class="main-content">
 
 
-      <!-- ========== INSTITUTIONAL BANNER ========== -->
-      <div class="institutional-banner">
+      <!-- ========== INSTITUTIONAL BANNER - BEM VINDO(A) A INTRANET IGEN ========= -->
+      <header class="institutional-banner" aria-label="Banner institucional">
         <video autoplay muted loop playsinline>
           <source src="images/banner.mp4" type="video/mp4">
           Seu navegador não suporta vídeo HTML5
         </video>
-      </div>
+      </header>
 
-      <!-- ========== NEWS SECTION (JSON/CARROSSEL) ========== -->
+      <!-- ========== NOTÍCIAS IGEN (JSON/CARROSSEL) ========== -->
       <section class="news-section">
         <div class="right-panel-header">
           <h3>Notícias do IGEN</h3>
@@ -127,32 +126,11 @@
         </div>
       </section>
 
-      <!--
-      ========== NEWS SECTION (GOOGLE SLIDES) - DESATIVADA ==========
-      <section class="news-section">
-        <div class="right-panel-header">
-          <h3>Notícias do IGEN</h3>
-        </div>
 
-        <div class="news-container">
-          <div class="carousel-wrapper">
-            <div class="news-slides-cover" data-base-width="1000" data-base-height="300">
-              <iframe class="news-slides-embed" data-base-width="1000" data-base-height="300"
-                src="https://docs.google.com/presentation/d/e/2PACX-1vTY8nQ7niNoRZ2_eya3P_5cVwz8BKPe3I2TivvVT0y3TDo9jdAIXtVbxU36NGQBG7R1epLuiJRYr1UZ/embed?start=true&loop=true&delayms=5000"
-                title="Notícias do IGEN - Google Slides" loading="lazy" allowfullscreen="true" mozallowfullscreen="true"
-                webkitallowfullscreen="true">
-              </iframe>
-            </div>
-          </div>
-          <div class="news-slides-link-wrap">
-            <a href="https://docs.google.com/presentation/d/e/2PACX-1vTY8nQ7niNoRZ2_eya3P_5cVwz8BKPe3I2TivvVT0y3TDo9jdAIXtVbxU36NGQBG7R1epLuiJRYr1UZ/pub?start=true&loop=true&delayms=5000"
-              target="_blank" rel="noopener noreferrer" class="news-slides-link">Abrir apresentação no Google Slides</a>
-          </div>
-        </div>
-      </section>
-      -->
+   <!-- ========== CARDS  ========== -->
 
-      <div class="cards-grid">
+
+      <section class="cards-grid" aria-label="Acessos rápidos">
 
         <a href="https://prod.igen.local/igen-web/manager/login/login.jsf" class="card-item" target="_blank"
           rel="noopener noreferrer">
@@ -255,9 +233,12 @@
           <div class="card-title">Relatórios SRI</div>
         </a>
 
-        <!-- ========== ESCALA PLANTAO ========== -->
 
-      </div>
+
+        <!-- ========== ESCALA PLANTAO ========== -->
+    
+
+      </section>
       <section class="plantao-section">
         <div class="plantao-header">
           <h2 id="plantao-title">Escalas de Plantões</h2>
@@ -277,9 +258,18 @@
           <button class="plantao-tab" data-type="TI">TI</button>
         </div>
 
+        <div class="plantao-pdf-actions" aria-label="Exportar calendário para PDF">
+          <label class="plantao-pdf-filter-option" for="calendarPdfFiltered">
+            <input type="checkbox" id="calendarPdfFiltered" checked>
+            Imprimir apenas o que está filtrado
+          </label>
+          <button type="button" class="plantao-pdf-btn" id="calendarPdfBtn">Salvar como PDF</button>
+        </div>
+
         <div class="plantao-viewer-wrapper" style="padding: 20px; background: white;">
           <div id="calendar"></div>
         </div>
+
         <!--FERIAS/FOLGAS-->
         <div class="calendario-info-extra">
           <div class="info-card">
@@ -293,22 +283,11 @@
         </div>
       </section>
 
-      <section class="status-desempenho-section news-section" aria-labelledby="status-desempenho-title">
-        <div class="right-panel-header">
-          <h3 id="status-desempenho-title">Acompanhamento do desempenho</h3>
-        </div>
-        <div class="status-desempenho-chart-wrapper">
-          <div id="chart_div" aria-live="polite"></div>
-          <p class="status-desempenho-label" id="statusDesempenhoLabel">Carregando status...</p>
-        </div>
-
-      </section>
-
     </main>
 
-    <!-- ========== RIGHT PANEL ========== -->
-    <aside class="right-panel">
-      <div class="right-panel-card">
+    <!-- ========== TELEFONES E RAMAIS ========== -->
+    <aside class="right-panel" aria-label="Painel lateral de contatos e eventos">
+      <section class="right-panel-card" aria-label="Telefones e ramais">
         <div class="right-panel-header">
           <h3>Telefones e Ramais</h3>
           <input type="text" class="right-panel-search" id="ramalSearch" placeholder="Buscar nome, ramal ou setor..." />
@@ -372,57 +351,22 @@
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      <!-- Eventos -->
-      <div class="right-panel-card congress-calendar-card">
+      <!-- EVENTOS IGEN -->
+      <section class="right-panel-card congress-calendar-card" aria-label="Eventos e congressos">
         <div class="right-panel-header">
           <h3>Eventos</h3>
         </div>
-        <div class="congress-events">
-          <div class="congress-event">
-            <div class="congress-date">19 a 24/05/26</div>
-            <div class="congress-content">
-              <div class="congress-title">19º Workshop Internacional de Histocompatibilidade e Imunogenética</div>
-              <div class="congress-location">Numazu, Japão </div>
-              <a href="https://ihiw19.org/" class="congress-link" target="_blank" rel="noopener noreferrer">Saiba
-                mais</a>
-            </div>
-          </div>
-
-          <div class="congress-event">
-            <div class="congress-date">20 a 24/06/26</div>
-            <div class="congress-content">
-              <div class="congress-title">Congresso Americano de Transplantes (ATC)</div>
-              <div class="congress-location">Boston, Estados Unidos</div>
-              <a href="https://www.atcmeeting.org/" class="congress-link" target="_blank"
-                rel="noopener noreferrer">Saiba mais</a>
-            </div>
-          </div>
-
-          <div class="congress-event">
-            <div class="congress-date">19 a 22/08/2026</div>
-            <div class="congress-content">
-              <div class="congress-title">XXX Congresso Brasileiro de Terapia Celular e Transplante de Medula Óssea
-              </div>
-              <div class="congress-location">Salvador, Brasil</div>
-              <a href="https://sbtmo.org.br/agenda/" class="congress-link" target="_blank"
-                rel="noopener noreferrer">Saiba mais</a>
-            </div>
-          </div>
-
-          <div class="congress-event">
-            <div class="congress-date">20 a 23/09/26</div>
-            <div class="congress-content">
-              <div class="congress-title">31º Congresso internacional da Sociedade de Transplantes </div>
-              <div class="congress-location">Sidney, Austrália</div>
-            </div>
-          </div>
+        <div class="congress-events" id="eventos-container">
+          <p>Carregando eventos...</p>
         </div>
-      </div>
-    </aside>
+      </section>
 
+    </aside>
   </div>
+  
+  <!-- RODAPE / FOOTER -->
 
   <footer class="site-footer">
     <div class="site-footer-text">
