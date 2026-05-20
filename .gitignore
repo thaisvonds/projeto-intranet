@@ -217,6 +217,9 @@ cython_debug/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
+# LibreOffice lock files
+.~lock.*#
+
 # Ruff stuff:
 .ruff_cache/
 
