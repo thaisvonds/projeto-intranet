@@ -14,10 +14,8 @@ class Settings(BaseSettings):
     sheets_dir: Path = DEFAULT_SHEETS_DIR
     cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: [
-            "http://localhost:5500",
-            "http://127.0.0.1:5500",
-            "http://localhost:8001",
-            "http://127.0.0.1:8001",
+            "http://localhost:8946",
+            "http://127.0.0.1:8946",
         ]
     )
 
