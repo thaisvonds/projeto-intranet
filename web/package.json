@@ -1,0 +1,19 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "description": "Este projeto representa a modernização completa da Intranet do **Instituto de Imunogenética (IGEN)**. O objetivo foi transformar um portal legado em uma plataforma ágil, responsiva e de fácil manutenção para as equipes de TI, RH e Comunicação, otimizando o fluxo de trabalho em um ambiente de laboratório genético.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 8946",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 8946"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "packageManager": "pnpm@11.2.0+sha512.cdd7e34ea0d237bed3fa89e633185027e3ecdad98ce7453032f4d4d83c10cb7b85b9afe8534048ab0a3cc10228bdd5e32f5f622d05d66e58f46177fe5601eab1",
+  "devDependencies": {
+    "vite": "^8.0.13"
+  }
+}

@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', function () {
   initEventosCongressos();
 });
 
+function getApiUrl(path) {
+  return path;
+}
+
 // 1. FILTRO DE BUSCA (RAMAIS)
 function initRamalFilter() {
   var searchInput = document.getElementById('ramalSearch');
@@ -34,9 +38,9 @@ function initPlantaoSection() {
   var calendarEl = document.getElementById('calendar');
   if (!calendarEl) return;
 
-  const URL_ESCALA = 'URL_ESCALA';
-  const URL_FERIAS = 'URL_FERIAS';
-  const URL_FOLGAS = 'URL_FOLGAS';
+  const URL_ESCALA = getApiUrl('/api/escalas');
+  const URL_FERIAS = getApiUrl('/api/ferias');
+  const URL_FOLGAS = getApiUrl('/api/folgas');
 
   Promise.all([
     fetchArray(URL_ESCALA, 'escala'),
@@ -344,7 +348,7 @@ async function initCarousel() {
 
 // 4. EVENTOS / CONGRESSOS VIA API
 async function initEventosCongressos() {
-  const URL_EVENTOS = 'URL_EVENTOS';
+  const URL_EVENTOS = getApiUrl('/api/eventos');
   const eventosContainer = document.getElementById('eventos-container');
   if (!eventosContainer) return;
 

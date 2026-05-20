@@ -18,29 +18,54 @@ A nova interface foi projetada para eliminar processos manuais e centralizar inf
 * **Frontend:** HTML5 semântico, CSS3 (Variáveis, Grid e Flexbox) e JavaScript Vanilla (ES6+).
 * **Bibliotecas:** * [FullCalendar 6.1](https://fullcalendar.io/) para gestão de escalas.
     * [Font Awesome](https://fontawesome.com/) para iconografia.
-* **Arquitetura de Dados:** Estrutura preparada para integração com APIs em **.NET 8**.
+* **Servidor de desenvolvimento:** [Vite](https://vite.dev/) com proxy local para a API.
+* **Arquitetura de Dados:** Consumo de API em **FastAPI** para alimentar Escalas, Férias, Folgas e Eventos a partir de planilhas Excel.
 
 ## Estrutura de Manutenção (Low-Code)
 
 Para permitir que equipes administrativas (RH/Secretaria) atualizem o portal sem tocar no código, o projeto inclui uma estrutura de suporte:
 
-1.  **Pasta `/modelos-tabelas`:** Contém planilhas Excel (`.xlsx`) padronizadas que servem de base para a alimentação das APIs.
-2.  **Integração:** O desenvolvedor backend utiliza esses modelos para gerar os JSONs consumidos pelo sistema.
+1.  **Pasta `api/data/examples`:** Contém planilhas Excel (`.xlsx`) padronizadas que servem de exemplo para a alimentação da API.
+2.  **Integração:** A API lê os modelos configurados e gera os JSONs consumidos pelo frontend.
 3.  **Notícias:** Atualização simplificada via `js/noticias.json` para a equipe de TI local.
 
 ## 📁 Estrutura do Repositório
 
 ```text
 PROJETO-INTRANET/
-├── css/                # Estilização modular e regras de impressão (@media print)
-├── js/                 # Lógica mestre: filtros, busca, PDF e conexões de API
-├── modelos-tabelas/    # Templates Excel para preenchimento (Escalas, Férias, Eventos)
-├── images/             # Ativos visuais e imagens do carrossel de notícias
-├── pdfs/               # Repositório de documentos institucionais
-└── index.html          # Estrutura principal do portal
+├── api/                # Serviço FastAPI que lê as planilhas e expõe JSON
+└── web/                # Frontend estático servido pelo Vite
+    ├── css/            # Estilização modular e regras de impressão (@media print)
+    ├── js/             # Lógica mestre: filtros, busca, PDF e conexões de API
+    ├── images/         # Ativos visuais e imagens do carrossel de notícias
+    ├── pdfs/           # Repositório de documentos institucionais
+    └── index.html      # Estrutura principal do portal
 ```
 
 👩‍💻 Sobre a Desenvolvedora
 Thaís Cavalcante - Desenvolvedora Full Stack Jr.
 
 Atualmente cursando Análise e Desenvolvimento de Sistemas, com foco em soluções práticas para o setor de genética e saúde, aplicando princípios de Clean Code, SOLID e automação de processos.
+
+## Execução local com Vite
+
+Inicie primeiro a API na porta `10638`:
+
+```bash
+cd ../api
+PYTHONPATH=src poetry run uvicorn srv_intranet_api.main:app --reload --port 10638
+```
+
+Depois inicie o frontend na porta `8946`:
+
+```bash
+pnpm run dev
+```
+
+O Vite redireciona `/api/*` para `http://127.0.0.1:10638`. Por isso, o frontend deve usar caminhos relativos, como `/api/escalas`.
+
+## Build de produção
+
+```bash
+pnpm run build
+```
