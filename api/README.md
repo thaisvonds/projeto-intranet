@@ -2,12 +2,44 @@
 
 Serviço em **FastAPI** responsável por ler os modelos de planilhas da intranet e expor os dados em JSON para o frontend estático.
 
-## Executar localmente
+## Instalação
+
+### Usando Poetry
+
+A partir desta pasta `api/`:
+
+```bash
+poetry install
+```
+
+### Usando pip
+
+Com o arquivo `requirements.txt` disponível no repositório:
+
+```bash
+pip install -r requirements.txt
+```
+
+Se também houver um arquivo com dependências de desenvolvimento:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+## Executar localmente com Poetry
 
 A partir desta pasta `api/`:
 
 ```bash
 PYTHONPATH=src poetry run uvicorn srv_intranet_api.main:app --reload --port 10638
+```
+
+## Executar localmente com pip
+
+Com as dependências instaladas via `pip`, execute:
+
+```bash
+PYTHONPATH=src uvicorn srv_intranet_api.main:app --reload --port 10638
 ```
 
 A API ficará disponível em:
@@ -60,7 +92,16 @@ O serviço lê a primeira aba de cada arquivo Excel e também o arquivo `colabor
 
 ## Desenvolvimento
 
+Com Poetry:
+
 ```bash
 poetry run pytest
 poetry run ruff check .
+```
+
+Com pip:
+
+```bash
+PYTHONPATH=src pytest
+ruff check .
 ```
