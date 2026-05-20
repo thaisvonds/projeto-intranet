@@ -3,15 +3,25 @@ document.addEventListener('DOMContentLoaded', function () {
   // 1. FILTRO DE BUSCA (RAMAIS)
   initRamalFilter();
 
-  // 2. CALENDÁRIO DE PLANTÕES COM INFOS EXTRAS
+  // 2. COLABORADORES (RAMAIS E ANIVERSARIANTES)
+  initColaboradores();
+
+  // 3. CALENDÁRIO DE PLANTÕES COM INFOS EXTRAS
   initPlantaoSection();
 
-  // 3. CARROSSEL DE NOTÍCIAS
+  // 4. CARROSSEL DE NOTÍCIAS
   initCarousel();
 
-  // 4. EVENTOS / CONGRESSOS VIA API
+  // 5. EVENTOS / CONGRESSOS VIA API
   initEventosCongressos();
 });
+
+const RAMAIS_PAGE_SIZE = 10;
+const BIRTHDAYS_PAGE_SIZE = 4;
+let ramaisData = [];
+let ramaisPage = 1;
+let aniversariantesData = [];
+let aniversariantesPage = 1;
 
 function getApiUrl(path) {
   return path;
@@ -23,14 +33,259 @@ function initRamalFilter() {
   if (!searchInput) return;
 
   searchInput.addEventListener('input', function () {
-    var filter = this.value.toLowerCase();
-    var rows = document.querySelectorAll('#ramalTable tbody tr');
-
-    rows.forEach(function (row) {
-      var text = row.textContent.toLowerCase();
-      row.style.display = text.indexOf(filter) > -1 ? '' : 'none';
-    });
+    ramaisPage = 1;
+    renderRamaisPage();
   });
+}
+
+function getFilteredRamais() {
+  const searchInput = document.getElementById('ramalSearch');
+  const filter = (searchInput ? searchInput.value : '').toLowerCase();
+
+  if (!filter) return ramaisData;
+
+  return ramaisData.filter(function (item) {
+    return [item.nome, item.setor, item.ramal].join(' ').toLowerCase().includes(filter);
+  });
+}
+
+// 2. COLABORADORES (RAMAIS E ANIVERSARIANTES)
+async function initColaboradores() {
+  await Promise.all([
+    loadRamais(),
+    loadAniversariantes()
+  ]);
+}
+
+async function loadRamais() {
+  const ramalBody = document.getElementById('ramalTableBody');
+  if (!ramalBody) return;
+
+  try {
+    const ramais = await fetchArrayStrict(getApiUrl('/api/colaboradores/ramais'), 'ramais');
+    renderRamais(ramais);
+  } catch (error) {
+    console.error('Erro ao carregar ramais:', error);
+    renderRamalMessage('Não foi possível carregar os ramais.');
+  }
+}
+
+async function loadAniversariantes() {
+  const birthdayBody = document.getElementById('birthdayTableBody');
+  if (!birthdayBody) return;
+
+  try {
+    const aniversariantes = await fetchArrayStrict(getApiUrl('/api/colaboradores/aniversariantes'), 'aniversariantes');
+    renderAniversariantes(aniversariantes);
+  } catch (error) {
+    console.error('Erro ao carregar aniversariantes:', error);
+    renderBirthdayMessage('Não foi possível carregar os aniversariantes.');
+  }
+}
+
+function renderRamais(ramais) {
+  ramaisData = Array.isArray(ramais) ? ramais : [];
+  ramaisPage = 1;
+  renderRamaisPage();
+}
+
+function renderRamaisPage() {
+  const ramalBody = document.getElementById('ramalTableBody');
+  if (!ramalBody) return;
+
+  const filteredRamais = getFilteredRamais();
+  const totalPages = Math.max(1, Math.ceil(filteredRamais.length / RAMAIS_PAGE_SIZE));
+  ramaisPage = Math.min(Math.max(ramaisPage, 1), totalPages);
+
+  ramalBody.innerHTML = '';
+
+  if (filteredRamais.length === 0) {
+    renderRamalMessage('Nenhum ramal encontrado.');
+    renderRamalPagination(0, 0);
+    return;
+  }
+
+  filteredRamais
+    .slice((ramaisPage - 1) * RAMAIS_PAGE_SIZE, ramaisPage * RAMAIS_PAGE_SIZE)
+    .forEach(function (item) {
+    const row = document.createElement('tr');
+    const infoCell = document.createElement('td');
+    const ramalCell = document.createElement('td');
+    const nameEl = document.createElement('div');
+    const sectorEl = document.createElement('div');
+
+    nameEl.className = 'contact-name';
+    nameEl.textContent = item.nome || '-';
+    sectorEl.className = 'contact-sector';
+    sectorEl.textContent = item.setor || '-';
+    ramalCell.className = 'contact-ramal';
+    ramalCell.textContent = item.ramal || '-';
+
+    infoCell.appendChild(nameEl);
+    infoCell.appendChild(sectorEl);
+    row.appendChild(infoCell);
+    row.appendChild(ramalCell);
+    ramalBody.appendChild(row);
+  });
+
+  renderRamalPagination(filteredRamais.length, totalPages);
+}
+
+function renderRamalPagination(totalItems, totalPages) {
+  const pagination = document.getElementById('ramalPagination');
+  if (!pagination) return;
+
+  pagination.innerHTML = '';
+
+  if (totalItems === 0) {
+    pagination.textContent = '0 ramais';
+    return;
+  }
+
+  const prevButton = document.createElement('button');
+  const nextButton = document.createElement('button');
+  const status = document.createElement('span');
+
+  prevButton.type = 'button';
+  prevButton.textContent = 'Anterior';
+  prevButton.disabled = ramaisPage <= 1;
+  prevButton.addEventListener('click', function () {
+    ramaisPage -= 1;
+    renderRamaisPage();
+  });
+
+  nextButton.type = 'button';
+  nextButton.textContent = 'Próxima';
+  nextButton.disabled = ramaisPage >= totalPages;
+  nextButton.addEventListener('click', function () {
+    ramaisPage += 1;
+    renderRamaisPage();
+  });
+
+  status.className = 'ramal-pagination-status';
+  status.textContent = ramaisPage + ' / ' + totalPages + ' • ' + totalItems + ' ramais';
+
+  pagination.appendChild(prevButton);
+  pagination.appendChild(status);
+  pagination.appendChild(nextButton);
+}
+
+function renderAniversariantes(aniversariantes) {
+  aniversariantesData = Array.isArray(aniversariantes) ? aniversariantes : [];
+  aniversariantesPage = 1;
+  renderAniversariantesPage();
+}
+
+function renderAniversariantesPage() {
+  const birthdayBody = document.getElementById('birthdayTableBody');
+  if (!birthdayBody) return;
+
+  const totalPages = Math.max(1, Math.ceil(aniversariantesData.length / BIRTHDAYS_PAGE_SIZE));
+  aniversariantesPage = Math.min(Math.max(aniversariantesPage, 1), totalPages);
+
+  birthdayBody.innerHTML = '';
+
+  if (aniversariantesData.length === 0) {
+    renderBirthdayMessage('Nenhum aniversariante neste mês.');
+    renderBirthdayPagination(0, 0);
+    return;
+  }
+
+  aniversariantesData
+    .slice((aniversariantesPage - 1) * BIRTHDAYS_PAGE_SIZE, aniversariantesPage * BIRTHDAYS_PAGE_SIZE)
+    .forEach(function (item) {
+    const row = document.createElement('tr');
+    const dayCell = document.createElement('td');
+    const nameCell = document.createElement('td');
+    const sectorCell = document.createElement('td');
+
+    dayCell.textContent = item.dia || '-';
+    nameCell.textContent = item.nome || '-';
+    sectorCell.textContent = item.setor || '-';
+
+    row.appendChild(dayCell);
+    row.appendChild(nameCell);
+    row.appendChild(sectorCell);
+    birthdayBody.appendChild(row);
+  });
+
+  renderBirthdayPagination(aniversariantesData.length, totalPages);
+}
+
+function renderBirthdayPagination(totalItems, totalPages) {
+  const pagination = document.getElementById('birthdayPagination');
+  if (!pagination) return;
+
+  pagination.innerHTML = '';
+
+  if (totalItems === 0) {
+    pagination.textContent = '0 aniversariantes';
+    return;
+  }
+
+  const prevButton = document.createElement('button');
+  const nextButton = document.createElement('button');
+  const status = document.createElement('span');
+
+  prevButton.type = 'button';
+  prevButton.textContent = 'Anterior';
+  prevButton.disabled = aniversariantesPage <= 1;
+  prevButton.addEventListener('click', function () {
+    aniversariantesPage -= 1;
+    renderAniversariantesPage();
+  });
+
+  nextButton.type = 'button';
+  nextButton.textContent = 'Próxima';
+  nextButton.disabled = aniversariantesPage >= totalPages;
+  nextButton.addEventListener('click', function () {
+    aniversariantesPage += 1;
+    renderAniversariantesPage();
+  });
+
+  status.className = 'birthday-pagination-status';
+  status.textContent = aniversariantesPage + ' / ' + totalPages;
+
+  pagination.appendChild(prevButton);
+  pagination.appendChild(status);
+  pagination.appendChild(nextButton);
+}
+
+function renderRamalMessage(message) {
+  const ramalBody = document.getElementById('ramalTableBody');
+  if (!ramalBody) return;
+
+  ramalBody.innerHTML = '';
+  const row = document.createElement('tr');
+  row.setAttribute('data-empty-row', 'true');
+  const cell = document.createElement('td');
+  cell.colSpan = 2;
+  cell.textContent = message;
+  row.appendChild(cell);
+  ramalBody.appendChild(row);
+
+  const pagination = document.getElementById('ramalPagination');
+  if (pagination) {
+    pagination.textContent = '';
+  }
+}
+
+function renderBirthdayMessage(message) {
+  const birthdayBody = document.getElementById('birthdayTableBody');
+  if (!birthdayBody) return;
+
+  birthdayBody.innerHTML = '';
+  const row = document.createElement('tr');
+  const cell = document.createElement('td');
+  cell.colSpan = 3;
+  cell.textContent = message;
+  row.appendChild(cell);
+  birthdayBody.appendChild(row);
+
+  const pagination = document.getElementById('birthdayPagination');
+  if (pagination) {
+    pagination.textContent = '';
+  }
 }
 
 // 2. CALENDÁRIO DE PLANTÕES COM INFOS EXTRAS
@@ -125,6 +380,16 @@ function fetchArray(url, label) {
       console.warn('Falha ao carregar ' + label + '. Usando lista vazia.', error);
       return [];
     });
+}
+
+async function fetchArrayStrict(url, label) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(label + ' indisponivel (' + response.status + ')');
+  }
+
+  const data = await response.json();
+  return Array.isArray(data) ? data : [];
 }
 
 // B. PREENCHIMENTO DAS INFOS EXTRAS (FÉRIAS E FOLGAS)

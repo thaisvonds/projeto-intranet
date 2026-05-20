@@ -30,33 +30,28 @@
       </div>
     </div>
     <div class="sidebar-birthday">
-      <table>
-        <thead>
-          <tr>
-            <th>Dia</th>
-            <th>Nome</th>
-            <th>Setor</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- ASP.NET GridView substituirá este conteúdo? -->
-          <tr>
-            <td>05</td>
-            <td>Maria Silva</td>
-            <td>PRA</td>
-          </tr>
-          <tr>
-            <td>12</td>
-            <td>João Santos</td>
-            <td>TI</td>
-          </tr>
-          <tr>
-            <td>18</td>
-            <td>Ana Costa</td>
-            <td>Bio. Mol.</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="birthday-table-wrapper">
+        <table>
+          <colgroup>
+            <col class="birthday-day-col">
+            <col class="birthday-name-col">
+            <col class="birthday-sector-col">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Dia</th>
+              <th>Nome</th>
+              <th>Setor</th>
+            </tr>
+          </thead>
+          <tbody id="birthdayTableBody">
+            <tr>
+              <td colspan="3">Carregando...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="birthday-pagination" id="birthdayPagination" aria-label="Paginação de aniversariantes"></div>
     </div>
 
     <!-- Calendários - LATERAL -->
@@ -304,53 +299,14 @@
                 <th>Ramal</th>
               </tr>
             </thead>
-            <tbody>
-              <!-- ASP.NET GridView substituirá este conteúdo -->
+            <tbody id="ramalTableBody">
               <tr>
-                <td>
-                  <div class="contact-name">Adriana Lídia Costa</div>
-                  <div class="contact-sector">Enfermagem</div>
-                </td>
-                <td class="contact-ramal">6137</td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="contact-name">Alan Andrew dos Santos</div>
-                  <div class="contact-sector">Biologia Molecular</div>
-                </td>
-                <td class="contact-ramal">6187</td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="contact-name">Aline Oliveira</div>
-                  <div class="contact-sector">Doador Falecido</div>
-                </td>
-                <td class="contact-ramal">6183</td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="contact-name">Amanda Ikegami</div>
-                  <div class="contact-sector">PRA</div>
-                </td>
-                <td class="contact-ramal">6146</td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="contact-name">Ana Paula de Carvalho</div>
-                  <div class="contact-sector">Sala de Coleta</div>
-                </td>
-                <td class="contact-ramal">6174</td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="contact-name">André Luiz Peco</div>
-                  <div class="contact-sector">Administração</div>
-                </td>
-                <td class="contact-ramal">6133</td>
+                <td colspan="2">Carregando ramais...</td>
               </tr>
             </tbody>
           </table>
         </div>
+        <div class="ramal-pagination" id="ramalPagination" aria-label="Paginação de ramais"></div>
       </section>
 
       <!-- EVENTOS IGEN -->
