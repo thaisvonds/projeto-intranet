@@ -1,3 +1,7 @@
+# Custom
+api/data/*
+!api/data/examples
+
 # Visual Studio Code
 .vscode/*
 !.vscode/settings.json

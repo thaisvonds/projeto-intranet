@@ -29,7 +29,14 @@ def test_sheet_endpoints_return_arrays() -> None:
     configure_examples_dir()
     client = TestClient(app)
 
-    for path in ["/api/escalas", "/api/ferias", "/api/folgas", "/api/eventos"]:
+    for path in [
+        "/api/escalas",
+        "/api/ferias",
+        "/api/folgas",
+        "/api/eventos",
+        "/api/colaboradores/ramais",
+        "/api/colaboradores/aniversariantes",
+    ]:
         response = client.get(path)
         assert response.status_code == 200
         assert isinstance(response.json(), list)

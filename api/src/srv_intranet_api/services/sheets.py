@@ -21,6 +21,7 @@ class SheetService:
     FERIAS_FILE = "ferias.xlsx"
     FOLGAS_FILE = "folgas.xlsx"
     EVENTOS_FILE = "eventos.xlsx"
+    COLABORADORES_FILE = "colaboradores.csv"
 
     ESCALAS_COLUMNS = [
         "Data",
@@ -31,6 +32,7 @@ class SheetService:
     FERIAS_COLUMNS = ["Funcionário", "Início das Férias", "Término das Férias"]
     FOLGAS_COLUMNS = ["Funcionário", "Dias de Folga (Ex: 01, 05, 10)"]
     EVENTOS_COLUMNS = ["Data", "Titulo", "Local", "Link"]
+    COLABORADORES_COLUMNS = ["NOME", "RAMAL", "SETOR", "DATA_NASCIMENTO"]
 
     def __init__(self, sheets_dir: Path) -> None:
         self.sheets_dir = Path(sheets_dir)
@@ -114,6 +116,40 @@ class SheetService:
 
         return eventos
 
+    def get_ramais(self) -> list[dict[str, str]]:
+        df = self._read_csv(self.COLABORADORES_FILE, self.COLABORADORES_COLUMNS)
+        ramais: list[dict[str, str]] = []
+
+        for row in df.iter_rows(named=True):
+            nome = _clean_text(row["NOME"])
+            ramal = _clean_text(row["RAMAL"])
+            setor = _clean_text(row["SETOR"])
+            if nome and ramal:
+                ramais.append({"nome": nome, "setor": setor, "ramal": ramal})
+
+        return sorted(ramais, key=lambda item: _sort_key(item["nome"]))
+
+    def get_aniversariantes(self, today: date | None = None) -> list[dict[str, str]]:
+        df = self._read_csv(self.COLABORADORES_FILE, self.COLABORADORES_COLUMNS)
+        month = (today or date.today()).month
+        aniversariantes: list[dict[str, str]] = []
+
+        for row in df.iter_rows(named=True):
+            nome = _clean_text(row["NOME"])
+            birthday = _parse_date(row["DATA_NASCIMENTO"])
+            if not nome or birthday is None or birthday.month != month:
+                continue
+
+            aniversariantes.append(
+                {
+                    "dia": f"{birthday.day:02d}",
+                    "nome": nome,
+                    "setor": _clean_text(row["SETOR"]),
+                }
+            )
+
+        return sorted(aniversariantes, key=lambda item: (int(item["dia"]), _sort_key(item["nome"])))
+
     def _read_sheet(self, filename: str, required_columns: list[str]) -> pl.DataFrame:
         path = self.sheets_dir / filename
         if not path.exists():
@@ -140,11 +176,38 @@ class SheetService:
 
         return df
 
+    def _read_csv(self, filename: str, required_columns: list[str]) -> pl.DataFrame:
+        path = self.sheets_dir / filename
+        if not path.exists():
+            raise SheetError(f"CSV file not found: {path}")
+
+        try:
+            mtime_ns = path.stat().st_mtime_ns
+        except OSError as exc:
+            raise SheetError(f"Cannot stat CSV file: {path}") from exc
+
+        cached = self._cache.get(path)
+        if cached and cached.mtime_ns == mtime_ns:
+            df = cached.dataframe
+        else:
+            try:
+                df = pl.read_csv(path)
+            except Exception as exc:
+                raise SheetError(f"Cannot read CSV file: {path}") from exc
+            self._cache[path] = CachedSheet(mtime_ns=mtime_ns, dataframe=df)
+
+        missing_columns = [column for column in required_columns if column not in df.columns]
+        if missing_columns:
+            raise SheetError(f"Missing columns in {filename}: {', '.join(missing_columns)}")
+
+        return df
+
 
 def _clean_text(value: Any) -> str:
     if value is None:
         return ""
-    return str(value).strip()
+    text = str(value).strip()
+    return "" if text.upper() == "NULL" else text
 
 
 def _format_iso_date(value: Any) -> str:
@@ -161,3 +224,23 @@ def _format_br_date(value: Any) -> str:
     if isinstance(value, date):
         return value.strftime("%d/%m/%Y")
     return _clean_text(value)
+
+
+def _parse_date(value: Any) -> date | None:
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+
+    text = _clean_text(value)
+    if not text:
+        return None
+
+    try:
+        return date.fromisoformat(text[:10])
+    except ValueError:
+        return None
+
+
+def _sort_key(value: str) -> str:
+    return value.casefold()

@@ -26,6 +26,10 @@ def create_app() -> FastAPI:
                 "name": "sheets",
                 "description": "Read-only endpoints generated from the Excel templates.",
             },
+            {
+                "name": "colaboradores",
+                "description": "Read-only endpoints generated from the collaborators CSV file.",
+            },
         ],
     )
 

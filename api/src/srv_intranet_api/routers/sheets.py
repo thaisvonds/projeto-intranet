@@ -4,7 +4,15 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from srv_intranet_api.schemas import ApiError, EscalaEvent, EventoItem, FeriasItem, FolgaItem
+from srv_intranet_api.schemas import (
+    AniversarianteItem,
+    ApiError,
+    EscalaEvent,
+    EventoItem,
+    FeriasItem,
+    FolgaItem,
+    RamalItem,
+)
 from srv_intranet_api.services.sheets import SheetError, SheetService
 from srv_intranet_api.settings import Settings, get_settings
 
@@ -75,3 +83,28 @@ def get_folgas(service: SheetService = Depends(get_sheet_service)) -> list[dict[
 )
 def get_eventos(service: SheetService = Depends(get_sheet_service)) -> list[dict[str, str]]:
     return _handle_sheet_call(service.get_eventos)
+
+
+@router.get(
+    "/colaboradores/ramais",
+    response_model=list[RamalItem],
+    tags=["colaboradores"],
+    summary="List employee phone extensions",
+    description=(
+        "Reads `colaboradores.csv` and returns employees or sectors with a valid phone extension. "
+        "Rows with empty or `NULL` extensions are not returned."
+    ),
+)
+def get_ramais(service: SheetService = Depends(get_sheet_service)) -> list[dict[str, str]]:
+    return _handle_sheet_call(service.get_ramais)
+
+
+@router.get(
+    "/colaboradores/aniversariantes",
+    response_model=list[AniversarianteItem],
+    tags=["colaboradores"],
+    summary="List current month birthdays",
+    description="Reads `colaboradores.csv` and returns birthdays for the current server month.",
+)
+def get_aniversariantes(service: SheetService = Depends(get_sheet_service)) -> list[dict[str, str]]:
+    return _handle_sheet_call(service.get_aniversariantes)

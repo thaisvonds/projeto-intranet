@@ -52,9 +52,11 @@ GET /api/escalas
 GET /api/ferias
 GET /api/folgas
 GET /api/eventos
+GET /api/colaboradores/ramais
+GET /api/colaboradores/aniversariantes
 ```
 
-O serviço lê a primeira aba de cada arquivo Excel. Arquivos ausentes, ilegíveis ou com colunas obrigatórias faltando retornam HTTP 500 para deixar problemas de template/configuração visíveis.
+O serviço lê a primeira aba de cada arquivo Excel e também o arquivo `colaboradores.csv`. Arquivos ausentes, ilegíveis ou com colunas obrigatórias faltando retornam HTTP 500 para deixar problemas de template/configuração visíveis.
 
 ## Desenvolvimento
 
