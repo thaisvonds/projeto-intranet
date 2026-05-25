@@ -22,9 +22,11 @@ let ramaisData = [];
 let ramaisPage = 1;
 let aniversariantesData = [];
 let aniversariantesPage = 1;
+let feriasDataGlobal = [];
+let folgasDataGlobal = [];
 
 function getApiUrl(path) {
-  return path;
+  return 'http://localhost:10638' + path;
 }
 
 // 1. FILTRO DE BUSCA (RAMAIS)
@@ -311,41 +313,27 @@ function initPlantaoSection() {
         height: 'auto',
         dayMaxEvents: false,
         events: escalaEvents,
-        eventClassNames: function (arg) {
-          const activeTabEl = document.querySelector('.plantao-tab.is-active');
-          const activeType = activeTabEl ? activeTabEl.getAttribute('data-type') : 'todos';
-          const eventType = arg.event.extendedProps.tipo;
-
-          // Lógica de Data Atual (Hoje)
-          const hoje = new Date().toISOString().split('T')[0];
-          const dataEvento = arg.event.startStr;
-
-          const calendarSearchInput = document.getElementById('calendarSearch');
-          const searchTerm = calendarSearchInput ? calendarSearchInput.value.toLowerCase() : '';
-          const titleMatches = arg.event.title.toLowerCase().includes(searchTerm);
-
-          // 1. Se a aba for 'hoje' e o evento não for de hoje, esconde.
-          if (activeType === 'hoje' && dataEvento !== hoje) {
-            return ['event-hidden'];
-          }
-
-          // 2. Filtro por tipo (Diurno/Noturno/TI) e busca por nome.
-          if ((activeType !== 'todos' && activeType !== 'hoje' && activeType !== eventType) || !titleMatches) {
-            return ['event-hidden'];
-          }
-
-          return [];
+        datesSet: function (info) {
+          applyPlantaoFilters(calendar);
+          updatePlantaoInfoByMonth(info.view.currentStart);
         },
         eventDidMount: function (info) {
           const tipo = info.event.extendedProps.tipo;
+          info.el.dataset.eventType = tipo || '';
+          info.el.dataset.eventTitle = info.event.title.toLowerCase();
+          info.el.dataset.eventDate = formatLocalDate(info.event.start);
+
           if (tipo) {
             info.el.classList.add('event-' + tipo.toLowerCase());
           }
+
+          applyPlantaoFilters(calendar);
         }
       });
 
       // Renderiza somente após os dados da escala serem carregados.
       calendar.render();
+      applyPlantaoFilters(calendar);
 
       // B. PREENCHIMENTO DAS INFOS EXTRAS (FÉRIAS E FOLGAS)
       fillPlantaoInfoLists(feriasData, folgasData);
@@ -362,6 +350,38 @@ function initPlantaoSection() {
     .catch(function (error) {
       console.error('Erro ao carregar dados de plantão:', error);
     });
+}
+
+function formatLocalDate(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return year + '-' + month + '-' + day;
+}
+
+function applyPlantaoFilters(calendar) {
+  const activeTabEl = document.querySelector('.plantao-tab.is-active');
+  const activeType = activeTabEl ? activeTabEl.getAttribute('data-type') : 'todos';
+  const calendarSearchInput = document.getElementById('calendarSearch');
+  const searchTerm = calendarSearchInput ? calendarSearchInput.value.trim().toLowerCase() : '';
+  const hoje = formatLocalDate(new Date());
+
+  calendar.el.querySelectorAll('.fc-event').forEach(function (eventEl) {
+    const eventType = eventEl.dataset.eventType || '';
+    const eventTitle = eventEl.dataset.eventTitle || '';
+    const eventDate = eventEl.dataset.eventDate || '';
+    const isTodayFilter = activeType === 'hoje';
+    const matchesToday = !isTodayFilter || eventDate === hoje;
+    const matchesType = isTodayFilter || activeType === 'todos' || activeType === eventType;
+    const matchesSearch = !searchTerm || eventTitle.includes(searchTerm);
+
+    eventEl.classList.toggle('event-hidden', !(matchesToday && matchesType && matchesSearch));
+  });
 }
 
 // Busca array por endpoint com fallback para evitar quebra da interface.
@@ -394,23 +414,71 @@ async function fetchArrayStrict(url, label) {
 
 // B. PREENCHIMENTO DAS INFOS EXTRAS (FÉRIAS E FOLGAS)
 function fillPlantaoInfoLists(feriasData, folgasData) {
+  feriasDataGlobal = Array.isArray(feriasData) ? feriasData : [];
+  folgasDataGlobal = Array.isArray(folgasData) ? folgasData : [];
+  
+  // Preenche com os dados do mês atual
+  updatePlantaoInfoByMonth(new Date());
+}
+
+function updatePlantaoInfoByMonth(dateInMonth) {
   const listaFerias = document.getElementById('lista-ferias');
   const listaFolgas = document.getElementById('lista-folgas');
+  const currentMonth = dateInMonth.getMonth() + 1;
+  const currentYear = dateInMonth.getFullYear();
 
   if (listaFerias) listaFerias.innerHTML = '';
   if (listaFolgas) listaFolgas.innerHTML = '';
 
-  if (Array.isArray(feriasData) && listaFerias) {
-    feriasData.forEach(function (item) {
-      listaFerias.innerHTML += '<li><strong>' + item.nome + ':</strong> ' + item.periodo + '</li>';
+  // Filtra férias do mês atual
+  if (Array.isArray(feriasDataGlobal) && listaFerias) {
+    const feriasMes = feriasDataGlobal.filter(function (item) {
+      return _isInMonth(item.periodo, currentMonth, currentYear);
     });
+
+    if (feriasMes.length === 0) {
+      listaFerias.innerHTML = '<li>Nenhuma féria em ' + currentMonth + '/' + currentYear + '</li>';
+    } else {
+      feriasMes.forEach(function (item) {
+        listaFerias.innerHTML += '<li><strong>' + item.nome + ':</strong> ' + item.periodo + '</li>';
+      });
+    }
   }
 
-  if (Array.isArray(folgasData) && listaFolgas) {
-    folgasData.forEach(function (item) {
-      listaFolgas.innerHTML += '<li><strong>' + item.nome + ':</strong> ' + item.detalhes + '</li>';
+  // Filtra folgas do mês atual
+  if (Array.isArray(folgasDataGlobal) && listaFolgas) {
+    const folgasMes = folgasDataGlobal.filter(function (item) {
+      return _isInMonth(item.detalhes, currentMonth, currentYear);
     });
+
+    if (folgasMes.length === 0) {
+      listaFolgas.innerHTML = '<li>Nenhuma folga em ' + currentMonth + '/' + currentYear + '</li>';
+    } else {
+      folgasMes.forEach(function (item) {
+        listaFolgas.innerHTML += '<li><strong>' + item.nome + ':</strong> ' + item.detalhes + '</li>';
+      });
+    }
   }
+}
+
+function _isInMonth(periodoText, month, year) {
+  if (!periodoText) return false;
+  
+  // Extrai datas do formato "DD/MM/YYYY a DD/MM/YYYY" ou "DD/MM/YYYY"
+  const dateMatches = periodoText.match(/(\d{2})\/(\d{2})\/(\d{4})/g);
+  if (!dateMatches) return false;
+
+  for (let i = 0; i < dateMatches.length; i++) {
+    const parts = dateMatches[i].split('/');
+    const itemMonth = parseInt(parts[1], 10);
+    const itemYear = parseInt(parts[2], 10);
+    
+    if (itemMonth === month && itemYear === year) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 // C. LÓGICA DAS ABAS (Com mudança de visualização)
@@ -424,15 +492,14 @@ function bindPlantaoTabs(calendar) {
       this.classList.add('is-active');
       const type = this.getAttribute('data-type');
 
-      // Se clicar em 'hoje', vai para visualização em lista do dia atual.
       if (type === 'hoje') {
         calendar.changeView('listDay');
+        calendar.gotoDate(new Date());
       } else {
-        // Se clicar em outra aba, volta para o calendário mensal.
         calendar.changeView('dayGridMonth');
       }
 
-      calendar.render();
+      applyPlantaoFilters(calendar);
     });
   });
 }
@@ -443,7 +510,7 @@ function bindPlantaoSearch(calendar) {
   if (!calendarSearchInput) return;
 
   calendarSearchInput.addEventListener('input', function () {
-    calendar.render();
+    applyPlantaoFilters(calendar);
   });
 }
 
@@ -470,6 +537,7 @@ function bindPlantaoPdfExport() {
     const titleEl = document.querySelector('.fc-toolbar-title');
     const title = titleEl ? titleEl.textContent : 'Escala de Plantões';
     const fullCalendarCss = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css';
+    const printLogoUrl = new URL('images/logo-igen-cor.png', window.location.href).href;
 
     const printWindow = window.open('', '_blank', 'width=1200,height=900');
     if (!printWindow) {
@@ -486,65 +554,286 @@ function bindPlantaoPdfExport() {
   <title>${title}</title>
   <link rel="stylesheet" href="${fullCalendarCss}" />
   <style>
-    body { margin: 0; padding: 16px; background: #fff; color: #1e293b; font-family: Arial, sans-serif; }
-    .print-calendar-title { margin: 0 0 12px; font-size: 22px; font-weight: 700; }
-    .print-calendar-wrap { border: 1px solid #dbe2ea; border-radius: 10px; padding: 12px; }
-    .fc .fc-toolbar { margin-bottom: 12px; }
+    @page {
+      size: A4 landscape;
+      margin: 10mm;
+    }
+    :root {
+      --print-navy: #103c7a;
+      --print-navy-soft: #edf3fb;
+      --print-border: #c8d5e6;
+      --print-text: #17324d;
+      --print-muted: #5d7289;
+      --print-diurno: #c62828;
+      --print-diurno-soft: #fdecec;
+      --print-noturno: #0d47a1;
+      --print-noturno-soft: #e9f1ff;
+      --print-ti: #2e7d32;
+      --print-ti-soft: #ebf7ec;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body {
+      margin: 0;
+      background: #fff;
+      color: var(--print-text);
+      font-family: Aptos, 'Segoe UI', Calibri, Arial, sans-serif;
+      font-size: 11px;
+      line-height: 1.25;
+    }
+    .print-page {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .print-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 12px;
+      border: 1px solid var(--print-border);
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ffffff 0%, var(--print-navy-soft) 100%);
+    }
+    .print-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+    .print-brand img {
+      width: 132px;
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    .print-brand-copy {
+      min-width: 0;
+    }
+    .print-kicker {
+      margin: 0 0 2px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--print-muted);
+      font-weight: 700;
+    }
+    .print-calendar-title {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.15;
+      color: var(--print-navy);
+      font-weight: 800;
+    }
+    .print-calendar-subtitle {
+      margin: 3px 0 0;
+      color: var(--print-muted);
+      font-size: 10px;
+    }
+    .print-calendar-wrap {
+      border: 1px solid var(--print-border);
+      border-radius: 10px;
+      padding: 8px;
+      background: #fff;
+    }
+    .fc .fc-header-toolbar {
+      display: none;
+    }
     .fc .fc-scrollgrid,
-    .fc .fc-scrollgrid table {
+    .fc .fc-scrollgrid table,
+    .fc .fc-scrollgrid-sync-table {
       width: 100% !important;
       table-layout: fixed !important;
       border-spacing: 0 !important;
     }
+    .fc .fc-scrollgrid-section > * {
+      min-width: 0 !important;
+    }
+    .fc .fc-scroller,
+    .fc .fc-scroller-liquid-absolute {
+      overflow: visible !important;
+    }
+    .fc .fc-daygrid-body,
+    .fc .fc-daygrid-body-balanced,
+    .fc .fc-daygrid-body-unbalanced,
+    .fc .fc-col-header {
+      width: 100% !important;
+    }
+    .fc .fc-col-header,
+    .fc .fc-daygrid-body table {
+      margin: 0 !important;
+    }
+    .fc .fc-col-header-cell-cushion {
+      padding: 4px 3px;
+      color: var(--print-navy);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: block;
+      text-align: center;
+    }
+    .fc .fc-daygrid-day-number {
+      color: var(--print-text);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 4px 0;
+    }
     .fc .fc-daygrid-day-frame {
-      min-height: 105px;
+      min-height: 58px;
       height: auto;
+      padding: 1px;
+    }
+    .fc .fc-daygrid-day-top {
+      justify-content: flex-end;
+    }
+    .fc .fc-daygrid-day-events {
+      margin-top: 0;
+      padding: 0 2px 1px;
+    }
+    .fc .fc-daygrid-event-harness {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .fc .fc-daygrid-event,
+    .fc .fc-list-event {
+      border-radius: 4px !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      font-size: 9.4px;
+      font-weight: 700;
+    }
+    .fc .fc-daygrid-event {
+      margin: 1px 0 0 !important;
+      padding: 0 3px 0 5px;
+      line-height: 1.1;
+    }
+    .fc .fc-event-title,
+    .fc .fc-event-time,
+    .fc .fc-list-event-title,
+    .fc .fc-list-event-time {
+      font-weight: 700;
+    }
+    .fc .fc-event-main {
+      padding: 0 !important;
+    }
+    .fc .fc-event-main-frame {
+      min-height: 0 !important;
+      gap: 0 !important;
+      line-height: 1.1;
     }
     .event-hidden {
       display: none !important;
     }
+    .event-diurno {
+      background: rgba(198, 40, 40, 0.06) !important;
+      box-shadow: inset 3px 0 0 var(--print-diurno) !important;
+    }
     .event-diurno .fc-event-title {
-      color: #1f3b2d !important;
+      color: var(--print-diurno) !important;
+    }
+    .event-diurno .fc-event-main,
+    .event-diurno .fc-event-time {
+      color: var(--print-diurno) !important;
+    }
+    .event-diurno .fc-list-event-dot {
+      border-color: var(--print-diurno) !important;
+      background: var(--print-diurno) !important;
+    }
+    .event-noturno {
+      background: rgba(13, 71, 161, 0.06) !important;
+      box-shadow: inset 3px 0 0 var(--print-noturno) !important;
     }
     .event-noturno .fc-event-title {
-      color: #1f3654 !important;
+      color: var(--print-noturno) !important;
+    }
+    .event-noturno .fc-event-main,
+    .event-noturno .fc-event-time {
+      color: var(--print-noturno) !important;
+    }
+    .event-noturno .fc-list-event-dot {
+      border-color: var(--print-noturno) !important;
+      background: var(--print-noturno) !important;
+    }
+    .event-ti {
+      background: rgba(46, 125, 50, 0.06) !important;
+      box-shadow: inset 3px 0 0 var(--print-ti) !important;
     }
     .event-ti .fc-event-title {
-      color: #4a2f1a !important;
+      color: var(--print-ti) !important;
+    }
+    .event-ti .fc-event-main,
+    .event-ti .fc-event-time {
+      color: var(--print-ti) !important;
+    }
+    .event-ti .fc-list-event-dot {
+      border-color: var(--print-ti) !important;
+      background: var(--print-ti) !important;
     }
     .fc {
-      --fc-border-color: #7c8b9b;
+      --fc-border-color: var(--print-border);
     }
     .fc-theme-standard .fc-scrollgrid,
     .fc-theme-standard .fc-scrollgrid td,
     .fc-theme-standard .fc-scrollgrid th {
-      border-color: #7c8b9b !important;
+      border-color: var(--print-border) !important;
       border-style: solid !important;
       border-width: 1px !important;
     }
+    .fc-theme-standard th {
+      background: #f7fafe;
+    }
+    .fc .fc-list,
+    .fc .fc-list-table {
+      border-color: var(--print-border) !important;
+    }
+    .fc .fc-list-day-cushion {
+      background: #f7fafe !important;
+      color: var(--print-navy) !important;
+      font-weight: 800;
+    }
     @media print {
-      body { padding: 0; }
-      .print-calendar-wrap { border: 0; border-radius: 0; padding: 0; }
+      body {
+        padding: 0;
+      }
+      .print-header,
+      .print-calendar-wrap {
+        border-radius: 0;
+      }
       .fc {
-        --fc-border-color: #000;
+        --fc-border-color: #94a9bf;
       }
       .fc-theme-standard .fc-scrollgrid,
       .fc-theme-standard .fc-scrollgrid td,
       .fc-theme-standard .fc-scrollgrid th {
-        border-color: #000 !important;
+        border-color: #94a9bf !important;
         border-style: solid !important;
         border-width: 1px !important;
       }
-      * {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+      .fc .fc-daygrid-day-frame {
+        min-height: 52px;
       }
     }
   </style>
 </head>
 <body>
-  <h1 class="print-calendar-title">${title}</h1>
-  <div class="print-calendar-wrap">${calendarClone.outerHTML}</div>
+  <div class="print-page">
+    <header class="print-header">
+      <div class="print-brand">
+        <img src="${printLogoUrl}" alt="IGEN" />
+        <div class="print-brand-copy">
+          <p class="print-kicker">Portal Institucional</p>
+          <h1 class="print-calendar-title">${title}</h1>
+          <p class="print-calendar-subtitle">Escala de plantões preparada para impressão em A4.</p>
+        </div>
+      </div>
+    </header>
+    <div class="print-calendar-wrap">${calendarClone.outerHTML}</div>
+  </div>
 </body>
 </html>`);
     printWindow.document.close();
