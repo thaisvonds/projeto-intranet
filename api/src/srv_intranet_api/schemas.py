@@ -52,6 +52,7 @@ class EventoItem(BaseModel):
                     "titulo": "Evento Institucional Exemplo",
                     "local": "São Paulo, Brasil",
                     "link": "https://example.org/evento",
+                    "link_submissao": "https://example.org/submissao",
                 }
             ]
         }
@@ -61,6 +62,11 @@ class EventoItem(BaseModel):
     titulo: str = Field(description="Event title.", examples=["Evento Institucional Exemplo"])
     local: str = Field(description="Event location.", examples=["São Paulo, Brasil"])
     link: str = Field(description="External event URL.", examples=["https://example.org/evento"])
+    link_submissao: str = Field(
+        default="",
+        description="Optional external submission URL for the event.",
+        examples=["https://example.org/submissao"],
+    )
 
 
 class RamalItem(BaseModel):

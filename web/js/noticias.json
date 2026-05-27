@@ -1,17 +1,17 @@
 [
   {
     "imagem": "images/noticias/slide1.png",
-    "link": "https://link-da-noticia-1.com",
+    "link": "http://treinamento.igen.local/course/view.php?id=186#section-1",
     "titulo": "Notícia 01"
   },
   {
     "imagem": "images/noticias/slide2.png",
-    "link": "https://ihiw19.org/",
+    "link": "https://ihiw19.org/components-projects/immunogenetics/",
     "titulo": "Notícia 02"
   },
   {
     "imagem": "images/noticias/slide3.png",
-    "link": "https://link-da-noticia-3.com",
+    "link": "https://congressosbtmo.org.br/programacao/",
     "titulo": "Notícia 03"
   }
 ]

@@ -313,6 +313,18 @@ function initPlantaoSection() {
         height: 'auto',
         dayMaxEvents: false,
         events: escalaEvents,
+        dayCellClassNames: function (arg) {
+          return getHolidayLabel(arg.date) ? ['fc-day-holiday'] : [];
+        },
+        dayCellDidMount: function (arg) {
+          const holidayLabel = getHolidayLabel(arg.date);
+
+          if (holidayLabel) {
+            arg.el.classList.add('fc-day-holiday');
+            arg.el.title = holidayLabel;
+            arg.el.dataset.holidayLabel = holidayLabel;
+          }
+        },
         datesSet: function (info) {
           applyPlantaoFilters(calendar);
           updatePlantaoInfoByMonth(info.view.currentStart);
@@ -362,6 +374,73 @@ function formatLocalDate(date) {
   const day = String(date.getDate()).padStart(2, '0');
 
   return year + '-' + month + '-' + day;
+}
+
+const holidayCache = new Map();
+
+function getHolidayLabel(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const year = date.getFullYear();
+
+  if (!holidayCache.has(year)) {
+    holidayCache.set(year, buildHolidayMap(year));
+  }
+
+  return holidayCache.get(year).get(formatLocalDate(date)) || '';
+}
+
+function buildHolidayMap(year) {
+  const holidays = new Map();
+
+  addHoliday(holidays, year, 1, 1, 'Confraternização Universal');
+  addHoliday(holidays, year, 1, 25, 'Aniversário de São Paulo');
+  addHoliday(holidays, year, 4, 21, 'Tiradentes');
+  addHoliday(holidays, year, 5, 1, 'Dia do Trabalho');
+  addHoliday(holidays, year, 7, 9, 'Revolução Constitucionalista de 1932');
+  addHoliday(holidays, year, 9, 7, 'Independência do Brasil');
+  addHoliday(holidays, year, 10, 12, 'Nossa Senhora Aparecida');
+  addHoliday(holidays, year, 11, 2, 'Finados');
+  addHoliday(holidays, year, 11, 15, 'Proclamação da República');
+  addHoliday(holidays, year, 11, 20, 'Consciência Negra');
+  addHoliday(holidays, year, 12, 25, 'Natal');
+
+  const easterSunday = getEasterSunday(year);
+  addHoliday(holidays, easterSunday.getFullYear(), easterSunday.getMonth() + 1, easterSunday.getDate() - 2, 'Sexta-feira Santa');
+  addHoliday(holidays, easterSunday.getFullYear(), easterSunday.getMonth() + 1, easterSunday.getDate() + 60, 'Corpus Christi');
+
+  return holidays;
+}
+
+function addHoliday(map, year, month, day, label) {
+  const date = new Date(year, month - 1, day);
+
+  if (date.getFullYear() !== year) {
+    return;
+  }
+
+  map.set(formatLocalDate(date), label);
+}
+
+function getEasterSunday(year) {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+
+  return new Date(year, month - 1, day);
 }
 
 function applyPlantaoFilters(calendar) {
@@ -534,6 +613,9 @@ function bindPlantaoPdfExport() {
       });
     }
 
+      // Reforca a classe de feriado no clone para garantir o destaque na impressao.
+      tagHolidayCells(calendarClone);
+
     const titleEl = document.querySelector('.fc-toolbar-title');
     const title = titleEl ? titleEl.textContent : 'Escala de Plantões';
     const fullCalendarCss = 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css';
@@ -570,6 +652,9 @@ function bindPlantaoPdfExport() {
       --print-noturno-soft: #e9f1ff;
       --print-ti: #2e7d32;
       --print-ti-soft: #ebf7ec;
+      --print-holiday-bg: #edf7f2;
+      --print-holiday-border: #b8dcc9;
+      --print-holiday-accent: #2f7d58;
     }
     * {
       box-sizing: border-box;
@@ -687,6 +772,23 @@ function bindPlantaoPdfExport() {
       min-height: 58px;
       height: auto;
       padding: 1px;
+    }
+      .fc-daygrid-day.fc-day-holiday {
+        background: var(--print-holiday-bg) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    .fc-daygrid-day.fc-day-holiday .fc-daygrid-day-frame {
+      background: var(--print-holiday-bg) !important;
+      box-shadow: inset 0 0 0 1px var(--print-holiday-border) !important;
+    }
+    .fc-daygrid-day.fc-day-holiday .fc-daygrid-day-number {
+      color: var(--print-holiday-accent) !important;
+      font-weight: 800 !important;
+    }
+    .fc-daygrid-day.fc-day-holiday.fc-day-today .fc-daygrid-day-frame {
+      background: var(--print-holiday-bg) !important;
+      box-shadow: inset 0 0 0 2px var(--print-holiday-border) !important;
     }
     .fc .fc-daygrid-day-top {
       justify-content: flex-end;
@@ -814,6 +916,11 @@ function bindPlantaoPdfExport() {
         border-style: solid !important;
         border-width: 1px !important;
       }
+        .fc-daygrid-day.fc-day-holiday {
+          background: var(--print-holiday-bg) !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
       .fc .fc-daygrid-day-frame {
         min-height: 52px;
       }
@@ -842,6 +949,21 @@ function bindPlantaoPdfExport() {
       printWindow.focus();
       printWindow.print();
     }, 500);
+  });
+}
+
+function tagHolidayCells(containerEl) {
+  if (!containerEl) return;
+
+  containerEl.querySelectorAll('.fc-daygrid-day[data-date]').forEach(function (dayCell) {
+    const dateText = dayCell.getAttribute('data-date');
+    if (!dateText) return;
+
+    const holidayLabel = getHolidayLabel(new Date(dateText + 'T00:00:00'));
+    if (!holidayLabel) return;
+
+    dayCell.classList.add('fc-day-holiday');
+    dayCell.setAttribute('title', holidayLabel);
   });
 }
 
@@ -938,14 +1060,33 @@ async function initEventosCongressos() {
         infoEl.appendChild(localEl);
       }
 
-      if (evento.link) {
+      const linksWrap = document.createElement('div');
+      linksWrap.className = 'congress-links';
+      const eventLink = evento.link || '';
+      const submitLink = evento.link_submissao || evento.linkSubmissao || evento.submissao || '';
+
+      if (eventLink) {
         const linkEl = document.createElement('a');
         linkEl.className = 'congress-link';
-        linkEl.href = evento.link;
+        linkEl.href = eventLink;
         linkEl.target = '_blank';
         linkEl.rel = 'noopener noreferrer';
         linkEl.textContent = 'Saiba mais';
-        infoEl.appendChild(linkEl);
+        linksWrap.appendChild(linkEl);
+      }
+
+      if (submitLink) {
+        const submitEl = document.createElement('a');
+        submitEl.className = 'congress-link congress-link-submit';
+        submitEl.href = submitLink;
+        submitEl.target = '_blank';
+        submitEl.rel = 'noopener noreferrer';
+        submitEl.textContent = 'Submissão';
+        linksWrap.appendChild(submitEl);
+      }
+
+      if (linksWrap.childElementCount > 0) {
+        infoEl.appendChild(linksWrap);
       }
 
       card.appendChild(dateEl);

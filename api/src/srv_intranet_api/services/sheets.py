@@ -111,6 +111,17 @@ class SheetService:
                     "titulo": titulo,
                     "local": _clean_text(row["Local"]),
                     "link": _clean_text(row["Link"]),
+                    "link_submissao": _first_text(
+                        row,
+                        [
+                            "Link Submissao",
+                            "Link Submissão",
+                            "Submissao",
+                            "Submissão",
+                            "Link_Submissao",
+                            "Link_Submissão",
+                        ],
+                    ),
                 }
             )
 
@@ -244,3 +255,13 @@ def _parse_date(value: Any) -> date | None:
 
 def _sort_key(value: str) -> str:
     return value.casefold()
+
+
+def _first_text(row: dict[str, Any], keys: list[str]) -> str:
+    for key in keys:
+        if key in row:
+            value = _clean_text(row[key])
+            if value:
+                return value
+
+    return ""
